@@ -20,9 +20,9 @@ const settings: Settings = {
   ],
   pingBoxTitle: '快☆樂☆表☆',
   pingMultiplier: 0.45,
-  showAutoRefreshControl: true,
+  showAutoRefreshControl: false,
   autoRefresh: true,
-  refreshInterval: 3000,
+  refreshInterval: 5000,
   debug: !IS_PROD,
   production: IS_PROD,
 }
