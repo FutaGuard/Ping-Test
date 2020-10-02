@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "strict": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "types": ["vite"],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+  }
+}
