@@ -3,11 +3,13 @@ import {
   DefineComponent,
   defineComponent,
   inject,
+  onBeforeUnmount,
   onMounted,
   PropType,
   provide,
   Ref,
   ref,
+  watch,
 } from 'vue'
 import usePing, { UsePingOptions } from '../../composables/usePing'
 import styles from './style/index.module.scss'
@@ -19,10 +21,19 @@ export const PingBoxItem = defineComponent({
   },
   setup(props) {
     const pingOpts = inject<Ref<UsePingOptions>>('pingOpts', ref({}))
-    const { ping, delta, error, loading, host } = usePing(
+    const { ping, delta, error, loading, host, toggleAutoRefresh } = usePing(
       props.url,
       pingOpts.value,
     )
+
+    watch(
+      () => !!pingOpts.value.autoRefresh,
+      (val) => toggleAutoRefresh(val),
+      { immediate: true },
+    )
+    onBeforeUnmount(() => {
+      toggleAutoRefresh(false)
+    })
 
     onMounted(() => {
       ping()
@@ -92,12 +103,19 @@ const PingBox = defineComponent({
   name: 'PingBox',
   props: {
     title: { type: String, default: '' },
+    showAutoRefreshControl: { type: Boolean, default: false },
     pingOpts: { type: Object as PropType<UsePingOptions>, default: {} },
   },
   setup(props) {
     const opts = ref<UsePingOptions>(props.pingOpts ?? {})
     provide('pingOpts', opts)
-    return {}
+    const handleChange = ({ target }: Event) => {
+      opts.value.autoRefresh = !!(target as HTMLInputElement).checked
+    }
+    return {
+      opts,
+      handleChange,
+    }
   },
   render() {
     return (
@@ -106,6 +124,19 @@ const PingBox = defineComponent({
           <h1 class="has-text-black has-text-centered is-size-3">
             {this.title}
           </h1>
+        )}
+        {this.showAutoRefreshControl && (
+          <div class="is-flex is-align-items-center is-justify-content-flex-end p-3">
+            <input
+              type="checkbox"
+              name="autoRefresh"
+              checked={this.opts.autoRefresh}
+              onChange={this.handleChange}
+            />
+            <label for="autoRefresh" class="pl-2">
+              自動更新
+            </label>
+          </div>
         )}
         <div class="tile">
           <div class="tile is-parent is-vertical">

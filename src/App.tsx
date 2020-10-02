@@ -9,10 +9,13 @@ export default defineComponent({
     const boxPops = {
       title: settings.pingBoxTitle,
       pingOpts: {
+        autoRefresh: settings.autoRefresh,
+        refreshInterval: settings.refreshInterval,
         timeout: settings.timeout,
         multiplier: settings.pingMultiplier,
         debug: settings.debug,
       },
+      showAutoRefreshControl: settings.showAutoRefreshControl,
     }
 
     return () => (

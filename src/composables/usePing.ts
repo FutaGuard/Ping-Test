@@ -1,8 +1,10 @@
-import { readonly, ref } from 'vue'
+import { readonly, ref, watch } from 'vue'
 
 export interface UsePingOptions {
   timeout?: number
   multiplier?: number
+  autoRefresh?: boolean
+  refreshInterval?: number
   debug?: boolean
 }
 
@@ -13,6 +15,8 @@ interface PingResponse {
 
 const defaultPingOptions = {
   multiplier: 1,
+  autoRefresh: false,
+  refreshInterval: 2000,
   debug: false,
 }
 
@@ -36,6 +40,10 @@ const usePing = (
   const loading = ref(false)
   const debug = opts?.debug ?? defaultPingOptions.debug
   const multiplier = opts?.multiplier || defaultPingOptions.multiplier
+  const refreshInterval =
+    opts?.refreshInterval || defaultPingOptions.refreshInterval
+  const autoRefresh = ref(opts?.autoRefresh ?? defaultPingOptions.autoRefresh)
+  const intervalId = ref<number>(0)
 
   const pingByFetch = (origin: string): Promise<PingResponse> => {
     let started: number = 0
@@ -85,8 +93,26 @@ const usePing = (
     })
   }
 
+  watch(
+    autoRefresh,
+    (val) => {
+      intervalId.value && clearInterval(intervalId.value)
+      if (val) {
+        intervalId.value = (setInterval(() => {
+          ping()
+        }, refreshInterval) as unknown) as number
+      }
+    },
+    { immediate: true },
+  )
+
+  const toggleAutoRefresh = (val?: boolean) => {
+    autoRefresh.value = val == null ? !autoRefresh.value : val
+  }
+
   return {
     ping,
+    toggleAutoRefresh,
     delta: readonly(delta),
     error: readonly(error),
     host: readonly(host),
